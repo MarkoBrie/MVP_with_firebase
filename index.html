@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Analysis: Firebase for Your MVP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive decision-making tool, not a linear report. It starts with a high-level summary, then moves to a "Decision Dashboard" comparing pros and cons. Key interactive elements include a cost-scaling simulator (Chart.js) to visualize the "scalability paradox," a database comparison tool, and a competitor analysis section. The structure culminates in an interactive checklist that provides a personalized recommendation. This non-linear, tool-based approach was chosen to transform the dense report into an actionable and engaging experience for the target audience (founders/developers), helping them decide if Firebase fits their specific needs. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Pros/Cons (Section 4 & 5) -> Goal: Compare -> Viz: Interactive Cards -> Interaction: Click to expand -> Justification: Breaks down complex info into digestible, user-driven chunks. -> Library: HTML/JS.
+        - Report Info: Cost Scaling Table (Section 5) -> Goal: Show Change -> Viz: Line Chart -> Interaction: Slider to adjust DAU -> Justification: Dynamically illustrates the "scalability paradox" far more effectively than a static table. -> Library: Chart.js.
+        - Report Info: Database Comparison (Section 3) -> Goal: Compare -> Viz: Tabbed Interface -> Interaction: Click tabs -> Justification: Allows direct, side-by-side comparison of Firestore and RTDB features. -> Library: HTML/JS.
+        - Report Info: Competitor Comparison Table (Section 6) -> Goal: Compare -> Viz: Radar Chart & Feature Cards -> Interaction: Hover/Click -> Justification: Radar chart gives a quick visual summary of trade-offs, while cards provide detailed feature comparisons. -> Library: Chart.js & HTML/JS.
+        - Report Info: Final Recommendation Framework (Section 7) -> Goal: Organize/Inform -> Viz: Interactive Checklist -> Interaction: User selects answers -> Justification: Personalizes the report's conclusion, making it an actionable decision tool. -> Library: HTML/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D405B;
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #E07A5F;
+            border-bottom-color: #E07A5F;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .btn-primary {
+            background-color: #E07A5F;
+            color: #FFFFFF;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #d46a4d;
+        }
+        .btn-secondary {
+            background-color: #81B29A;
+            color: #FFFFFF;
+            transition: background-color 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #6a9a83;
+        }
+        .tab.active {
+            background-color: #3D405B;
+            color: #FFFFFF;
+        }
+        .section-title {
+            color: #3D405B;
+        }
+        .section-subtitle {
+            color: #828282;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-40 w-full border-b border-gray-200">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="text-2xl font-bold text-gray-800">Firebase MVP Analysis</div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#dashboard" class="nav-link text-gray-600 font-medium pb-1">Dashboard</a>
+                    <a href="#cost-simulator" class="nav-link text-gray-600 font-medium pb-1">Cost Simulator</a>
+                    <a href="#competitors" class="nav-link text-gray-600 font-medium pb-1">Competitors</a>
+                    <a href="#verdict" class="nav-link text-gray-600 font-medium pb-1">Verdict</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 md:py-32 bg-white">
+            <div class="container mx-auto px-4 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold section-title leading-tight">Firebase for Your MVP:</h1>
+                <h2 class="text-4xl md:text-6xl font-bold text-[#E07A5F] leading-tight mb-6">The Ultimate Trade-Off</h2>
+                <p class="max-w-3xl mx-auto text-lg md:text-xl text-gray-600 mb-8">
+                    An interactive analysis of Firebase as an MVP accelerator. Explore the balance between unparalleled development speed and the critical long-term trade-offs of cost, flexibility, and vendor lock-in.
+                </p>
+                <a href="#dashboard" class="btn-primary font-bold py-3 px-8 rounded-full text-lg">
+                    Start the Analysis
+                </a>
+            </div>
+        </section>
+
+        <section id="dashboard" class="py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">The Decision Dashboard</h2>
+                    <p class="mt-4 text-lg section-subtitle max-w-2xl mx-auto">Firebase offers a compelling package for launching quickly, but it's a strategic choice with long-term consequences. Here's a breakdown of the core trade-offs.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
+                    <div>
+                        <h3 class="text-2xl font-bold text-center mb-6 text-[#81B29A]">The Firebase Advantage (PROS)</h3>
+                        <div class="space-y-4" id="pros-container">
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-center mb-6 text-[#E07A5F]">The Long-Term Risks (CONS)</h3>
+                        <div class="space-y-4" id="cons-container">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="database-deep-dive" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">Database Deep Dive</h2>
+                    <p class="mt-4 text-lg section-subtitle max-w-2xl mx-auto">At the heart of Firebase are its two JSON-based NoSQL databases. Choosing the right one is critical for your app's architecture and scalability.</p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex justify-center mb-8 bg-gray-100 rounded-full p-1">
+                        <button id="firestore-tab" class="tab flex-1 py-2 px-4 rounded-full font-semibold text-gray-600 transition-colors duration-300">Cloud Firestore</button>
+                        <button id="rtdb-tab" class="tab flex-1 py-2 px-4 rounded-full font-semibold text-gray-600 transition-colors duration-300">Realtime Database</button>
+                    </div>
+                    <div id="database-content"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cost-simulator" class="py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">The Scalability Paradox: Cost Simulator</h2>
+                    <p class="mt-4 text-lg section-subtitle max-w-2xl mx-auto">Firebase is cheap to start, but costs can become unpredictable and escalate quickly with user growth. Use the slider to see how monthly costs can change based on Daily Active Users (DAU).</p>
+                </div>
+                <div class="max-w-4xl mx-auto card p-6 md:p-8">
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                    <div class="mt-8">
+                        <label for="dau-slider" class="block text-center font-semibold text-lg mb-2">Daily Active Users (DAU): <span id="dau-value" class="font-bold text-[#E07A5F]">5,000</span></label>
+                        <input id="dau-slider" type="range" min="0" max="2" step="1" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-sm text-gray-500 mt-2">
+                            <span>5k</span>
+                            <span>100k</span>
+                            <span>1M</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="competitors" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">Competitor Showdown</h2>
+                    <p class="mt-4 text-lg section-subtitle max-w-2xl mx-auto">Firebase doesn't exist in a vacuum. See how it stacks up against its main rivals: the open-source Supabase and the enterprise-grade AWS Amplify.</p>
+                </div>
+                <div class="max-w-5xl mx-auto mb-16">
+                     <div class="chart-container" style="max-width: 600px; height: 350px;">
+                        <canvas id="competitorRadarChart"></canvas>
+                    </div>
+                </div>
+                <div id="competitor-cards" class="grid md:grid-cols-3 gap-8">
+                </div>
+            </div>
+        </section>
+
+        <section id="verdict" class="py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">The Final Verdict: Should You Use Firebase?</h2>
+                    <p class="mt-4 text-lg section-subtitle max-w-2xl mx-auto">Answer these key strategic questions to get a personalized recommendation for your MVP.</p>
+                </div>
+                <div class="max-w-2xl mx-auto card p-6 md:p-8">
+                    <div id="quiz-container" class="space-y-6"></div>
+                    <div id="recommendation-container" class="mt-8 text-center hidden">
+                        <h3 id="recommendation-title" class="text-2xl font-bold"></h3>
+                        <p id="recommendation-text" class="mt-2 text-lg"></p>
+                        <button id="reset-quiz" class="mt-6 btn-secondary font-semibold py-2 px-6 rounded-full">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>This interactive analysis was generated from the report "Firebase for the Modern MVP: A Strategic Analysis of Speed, Scale, and Sustainability."</p>
+            <p class="text-sm text-gray-400 mt-2">All data and insights are based on the provided source material.</p>
+        </div>
+    </footer>
+    
+    <div id="modal-backdrop" class="fixed inset-0 z-50 modal-backdrop hidden">
+        <div id="modal-content" class="modal-content fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl rounded-lg shadow-lg p-6 md:p-8 max-h-[80vh] overflow-y-auto">
+            <h3 id="modal-title" class="text-2xl font-bold mb-4"></h3>
+            <div id="modal-body" class="prose max-w-none text-gray-700"></div>
+            <button id="modal-close" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const data = {
+        pros: [
+            {
+                title: '⚡️ Unmatched Development Velocity',
+                summary: 'Dramatically accelerate your time-to-market by abstracting away backend and infrastructure concerns.',
+                details: `<p>The single most significant advantage of Firebase for an MVP is the dramatic acceleration of the development process. The platform achieves this by providing ready-made, production-quality solutions for common application features that would otherwise consume weeks or months of engineering time.</p><ul><li><strong>Pre-built Authentication:</strong> Secure user login and management is reduced to a few lines of code.</li><li><strong>Direct Database Access:</strong> Client-side SDKs allow you to build features without writing server-side code for many operations.</li><li><strong>Simple Deployment:</strong> Firebase Hosting deploys your web app to a global CDN with a single command.</li></ul><p>This focus on speed and simplicity allows even a small team to move from idea to a product in the hands of early adopters as quickly as possible.</p>`
+            },
+            {
+                title: '💰 Zero Initial Cost & Overhead',
+                summary: 'Launch and operate your MVP with minimal to zero financial outlay thanks to a generous free tier.',
+                details: `<p>For a bootstrapped startup, managing cash flow is paramount. Firebase's "Spark Plan" offers a generous free tier across most of its core products, often sufficient for an early-stage product gathering its first users.</p><p>For example, the free plan includes:</p><ul><li><strong>Firestore:</strong> 50k reads, 20k writes, 20k deletes per day.</li><li><strong>Authentication:</strong> Up to 50,000 monthly active users.</li><li><strong>Hosting & Storage:</strong> 10 GB and 5 GB respectively.</li></ul><p>Beyond direct savings, the serverless nature of the platform eliminates the need for dedicated DevOps or backend engineers in the early stages, significantly reducing operational overhead.</p>`
+            },
+            {
+                title: '🔄 The "Validated Learning" Flywheel',
+                summary: 'An integrated suite of tools to support the entire "Build-Measure-Learn" cycle of your MVP.',
+                details: `<p>A successful MVP is not just about building a product; it is about learning from it. Firebase is uniquely positioned to support this entire cycle.</p><ul><li><strong>Google Analytics:</strong> Provides deep, event-based insights into how users are engaging with your application.</li><li><strong>Crashlytics:</strong> Offers real-time, detailed crash reporting to quickly identify and fix bugs.</li><li><strong>A/B Testing & Remote Config:</strong> Empowers you to experiment with features and UI variations without releasing a new app version, enabling data-driven decisions.</li></ul>`
+            },
+            {
+                title: '📡 Inherent Real-Time & Offline Capabilities',
+                summary: 'Build modern, responsive apps with out-of-the-box data synchronization and offline support.',
+                details: `<p>In the modern application landscape, users expect responsive and interactive experiences. Firebase's databases are architected from the ground up for real-time data synchronization. Building collaborative applications like live chat or activity feeds is dramatically simplified.</p><p>Equally important is the robust offline support. The Firebase SDKs automatically cache data on the user's device, ensuring the application remains fully functional even with an intermittent internet connection. Any changes made while offline are automatically synchronized once connectivity is restored. This provides a key competitive advantage from day one.</p>`
+            }
+        ],
+        cons: [
+            {
+                title: '💸 The Scalability Paradox: Unpredictable Costs',
+                summary: 'The pay-as-you-go model can lead to surprise bills and makes cost forecasting difficult at scale.',
+                details: `<p>While cheap to start, Firebase's "Blaze" plan can become a double-edged sword. The pricing model, especially for Firestore, is based on the number of operations (reads, writes, deletes). A poorly designed query or an unexpected user behavior can cause the number of billable operations to skyrocket.</p><p>A critical risk is that Firebase <strong>does not provide a mechanism for a hard spending cap</strong>. You can set budget alerts, but they only notify you; they do not automatically shut down services. A bug, such as an infinite loop, can continue to accrue costs unchecked, leaving you liable for a potentially massive bill.</p>`
+            },
+            {
+                title: '🔒 The High Walls of the Garden: Vendor Lock-In',
+                summary: 'Committing to Firebase means deep integration with a proprietary ecosystem, making future migration difficult and costly.',
+                details: `<p>Choosing Firebase is a commitment to a proprietary, closed-source ecosystem. Migrating an application away from Firebase is not a simple matter of exporting a database. It is a complex engineering task that requires substantial application refactoring and rewriting parts of the codebase.</p><p>The client SDKs and APIs for services like Firestore and Authentication are unique to Firebase and have no direct, portable equivalent. A stark, real-world example is Google's decision to sunset Firebase Dynamic Links, forcing all developers who used it to migrate to an alternative by a hard deadline. This demonstrates that businesses built on Firebase are ultimately subject to the strategic roadmap of Google.</p>`
+            },
+            {
+                title: '🧩 Constraints of NoSQL for Relational Data',
+                summary: 'Lacks support for complex queries (JOINs), often requiring complex and costly workarounds.',
+                details: `<p>Firestore's flexible document model becomes a significant constraint for applications with highly relational data. The most prominent limitation is the lack of support for server-side JOIN operations, a standard feature in SQL databases.</p><p>To retrieve related data, developers must either perform multiple client-side queries (increasing billable reads and latency) or denormalize their data. Denormalization involves storing redundant copies of data, which shifts complexity from reading to writing. For example, if a user changes their name, that change must be propagated to every comment or post they've ever made, often requiring complex Cloud Functions to maintain consistency.</p>`
+            },
+            {
+                title: '🤔 Limited Control and Flexibility',
+                summary: 'The "it just works" simplicity comes at the cost of control over the underlying infrastructure and database.',
+                details: `<p>The abstraction that makes Firebase so fast is also a source of limitation. You have limited control over the underlying infrastructure. You cannot choose a specific country for data storage (only a region), which can be an issue for data privacy compliance like GDPR.</p><p>Furthermore, you cannot fine-tune database performance in the same way you could with a self-hosted solution. You are reliant on the performance characteristics and feature set provided by Google, which may not always align with your specific needs as your application matures.</p>`
+            }
+        ],
+        databases: {
+            firestore: {
+                title: 'Cloud Firestore (Recommended)',
+                content: `
+                    <p class="text-lg mb-4">Google's flagship database for mobile and web app development, designed to address the limitations of RTDB with a more structured and scalable data model.</p>
+                    <ul class="space-y-3 list-disc list-inside">
+                        <li><strong>Data Model:</strong> Uses a Document/Collection structure, allowing for more manageable data hierarchies with subcollections.</li>
+                        <li><strong>Querying:</strong> Offers rich, indexed queries, supporting compound filtering and sorting on multiple fields simultaneously.</li>
+                        <li><strong>Scalability:</strong> Scales automatically and transparently to ~1 million concurrent connections. Queries scale with the size of the result set, not the total dataset.</li>
+                        <li><strong>Reliability:</strong> Offers up to 99.999% uptime with multi-region support, replicating data across multiple data centers.</li>
+                        <li><strong>Offline Support:</strong> Comprehensive offline support for Web, iOS, and Android clients.</li>
+                    </ul>
+                `
+            },
+            rtdb: {
+                title: 'Realtime Database (Legacy/Niche)',
+                content: `
+                    <p class="text-lg mb-4">Firebase's original database offering. It's a single, large JSON tree, which is simple but has significant limitations at scale.</p>
+                     <ul class="space-y-3 list-disc list-inside">
+                        <li><strong>Data Model:</strong> A single, large JSON tree. Can become unwieldy for complex, nested data.</li>
+                        <li><strong>Querying:</strong> Very rudimentary. Complex filtering is difficult and often requires significant data denormalization.</li>
+                        <li><strong>Scalability:</strong> Limited to ~200,000 concurrent connections. Requires manual sharding (partitioning) to scale further.</li>
+                        <li><strong>Key Feature:</strong> Offers extremely low-latency state syncing and a native "presence" feature to detect when users are online/offline.</li>
+                        <li><strong>Use Case:</strong> Best for niche applications requiring the absolute lowest latency, like collaborative whiteboards or simple multiplayer games.</li>
+                    </ul>
+                `
+            }
+        },
+        competitors: [
+            {
+                name: 'Firebase',
+                philosophy: 'Tightly integrated BaaS platform for maximum development speed.',
+                database: 'NoSQL (Cloud Firestore)',
+                easeOfUse: 'Easiest to learn, ideal for frontend-heavy teams.',
+                costModel: 'Least predictable (pay-per-operation).',
+                lockIn: 'High',
+                idealFor: 'Projects where speed-to-market is the absolute priority; social/collaborative apps.'
+            },
+            {
+                name: 'Supabase',
+                philosophy: 'Open-source, SQL-first toolkit built on PostgreSQL.',
+                database: 'Relational SQL (PostgreSQL)',
+                easeOfUse: 'Gentle learning curve, especially for those familiar with SQL.',
+                costModel: 'Most predictable (tiered plans).',
+                lockIn: 'Low',
+                idealFor: 'Apps with relational data; projects where cost control and avoiding lock-in are priorities.'
+            },
+            {
+                name: 'AWS Amplify',
+                philosophy: 'Developer-friendly gateway to the powerful AWS ecosystem.',
+                database: 'Flexible (DynamoDB or RDS via AppSync)',
+                easeOfUse: 'Steepest learning curve, requires some AWS knowledge.',
+                costModel: 'Complex (based on underlying AWS services).',
+                lockIn: 'High',
+                idealFor: 'Teams committed to AWS; projects needing enterprise-grade scalability from day one.'
+            }
+        ],
+        quiz: [
+            {
+                question: "What is your project's #1 priority?",
+                answers: [
+                    { text: "Maximum speed to market", value: "firebase" },
+                    { text: "Long-term cost control & predictability", value: "supabase" },
+                    { text: "Deep integration with an enterprise cloud", value: "amplify" }
+                ]
+            },
+            {
+                question: "How would you describe your core data model?",
+                answers: [
+                    { text: "Document-oriented (e.g., user profiles, posts, chat)", value: "firebase" },
+                    { text: "Highly relational (e.g., users, organizations, projects, tasks)", value: "supabase" },
+                    { text: "I need maximum flexibility for complex or evolving needs", value: "amplify" }
+                ]
+            },
+            {
+                question: "Which statement best describes your long-term strategy?",
+                answers: [
+                    { text: "Get to product-market fit ASAP, worry about migration later", value: "firebase" },
+                    { text: "Avoid vendor lock-in and maintain data portability at all costs", value: "supabase" },
+                    { text: "Build on a platform that offers a clear path to enterprise-grade services", value: "amplify" }
+                ]
+            }
+        ]
+    };
+
+    const prosContainer = document.getElementById('pros-container');
+    const consContainer = document.getElementById('cons-container');
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const modalContent = document.getElementById('modal-content');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalClose = document.getElementById('modal-close');
+
+    function createCard(item, type) {
+        const card = document.createElement('div');
+        card.className = 'card p-6 cursor-pointer';
+        card.innerHTML = `
+            <h4 class="font-bold text-xl mb-2">${item.title}</h4>
+            <p class="text-gray-600">${item.summary}</p>
+        `;
+        card.addEventListener('click', () => {
+            modalTitle.textContent = item.title;
+            modalBody.innerHTML = item.details;
+            modalBackdrop.classList.remove('hidden');
+        });
+        return card;
+    }
+
+    data.pros.forEach(item => prosContainer.appendChild(createCard(item, 'pro')));
+    data.cons.forEach(item => consContainer.appendChild(createCard(item, 'con')));
+
+    modalClose.addEventListener('click', () => modalBackdrop.classList.add('hidden'));
+    modalBackdrop.addEventListener('click', (e) => {
+        if (e.target === modalBackdrop) {
+            modalBackdrop.classList.add('hidden');
+        }
+    });
+
+    const firestoreTab = document.getElementById('firestore-tab');
+    const rtdbTab = document.getElementById('rtdb-tab');
+    const dbContent = document.getElementById('database-content');
+
+    function updateDatabaseContent(dbKey) {
+        firestoreTab.classList.toggle('active', dbKey === 'firestore');
+        rtdbTab.classList.toggle('active', dbKey === 'rtdb');
+        dbContent.innerHTML = `
+            <div class="card p-6 md:p-8">
+                <h3 class="text-2xl font-bold mb-4">${data.databases[dbKey].title}</h3>
+                <div class="prose max-w-none text-gray-700">${data.databases[dbKey].content}</div>
+            </div>
+        `;
+    }
+
+    firestoreTab.addEventListener('click', () => updateDatabaseContent('firestore'));
+    rtdbTab.addEventListener('click', () => updateDatabaseContent('rtdb'));
+    updateDatabaseContent('firestore');
+
+    const dauSlider = document.getElementById('dau-slider');
+    const dauValue = document.getElementById('dau-value');
+    const costData = {
+        labels: ['5k DAU', '100k DAU', '1M DAU'],
+        costs: [12.14, 292.02, 2951.52],
+        dauLevels: ['5,000', '100,000', '1,000,000']
+    };
+    
+    let costChart;
+    function renderCostChart(index) {
+        const ctx = document.getElementById('costChart').getContext('2d');
+        const dataForChart = {
+            labels: costData.labels.slice(0, index + 1),
+            datasets: [{
+                label: 'Estimated Monthly Cost ($)',
+                data: costData.costs.slice(0, index + 1),
+                borderColor: '#E07A5F',
+                backgroundColor: 'rgba(224, 122, 95, 0.2)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#E07A5F',
+                pointRadius: 5
+            }]
+        };
+
+        if (costChart) {
+            costChart.data = dataForChart;
+            costChart.update();
+        } else {
+            costChart = new Chart(ctx, {
+                type: 'line',
+                data: dataForChart,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    dauSlider.addEventListener('input', (e) => {
+        const index = parseInt(e.target.value);
+        dauValue.textContent = costData.dauLevels[index];
+        renderCostChart(index);
+    });
+    renderCostChart(0);
+    
+    const competitorCardsContainer = document.getElementById('competitor-cards');
+    data.competitors.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'card p-6';
+        card.innerHTML = `
+            <h4 class="text-2xl font-bold mb-4">${c.name}</h4>
+            <ul class="space-y-3 text-gray-700">
+                <li><strong>Philosophy:</strong> ${c.philosophy}</li>
+                <li><strong>Database:</strong> ${c.database}</li>
+                <li><strong>Ease of Use:</strong> ${c.easeOfUse}</li>
+                <li><strong>Cost Model:</strong> ${c.costModel}</li>
+                <li><strong>Vendor Lock-In:</strong> <span class="font-bold ${c.lockIn === 'High' ? 'text-red-500' : 'text-green-600'}">${c.lockIn}</span></li>
+                <li class="pt-2 mt-2 border-t"><strong>Ideal For:</strong> ${c.idealFor}</li>
+            </ul>
+        `;
+        competitorCardsContainer.appendChild(card);
+    });
+
+    const radarCtx = document.getElementById('competitorRadarChart').getContext('2d');
+    new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+            labels: ['Speed', 'Ease of Use', 'Cost Predictability', 'Portability (Low Lock-In)', 'Relational Data Fit'],
+            datasets: [
+                {
+                    label: 'Firebase',
+                    data: [5, 5, 2, 1, 2],
+                    borderColor: '#E07A5F',
+                    backgroundColor: 'rgba(224, 122, 95, 0.2)',
+                },
+                {
+                    label: 'Supabase',
+                    data: [4, 4, 4, 5, 5],
+                    borderColor: '#81B29A',
+                    backgroundColor: 'rgba(129, 178, 154, 0.2)',
+                },
+                {
+                    label: 'AWS Amplify',
+                    data: [3, 2, 3, 2, 4],
+                    borderColor: '#3D405B',
+                    backgroundColor: 'rgba(61, 64, 91, 0.2)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    pointLabels: {
+                        font: {
+                            size: 12
+                        }
+                    },
+                    ticks: {
+                        backdropColor: 'transparent',
+                        stepSize: 1
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 5
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    enabled: true
+                }
+            }
+        }
+    });
+
+    const quizContainer = document.getElementById('quiz-container');
+    const recommendationContainer = document.getElementById('recommendation-container');
+    const recommendationTitle = document.getElementById('recommendation-title');
+    const recommendationText = document.getElementById('recommendation-text');
+    const resetQuizBtn = document.getElementById('reset-quiz');
+    
+    function renderQuiz() {
+        quizContainer.innerHTML = '';
+        data.quiz.forEach((q, index) => {
+            const questionEl = document.createElement('div');
+            questionEl.innerHTML = `<p class="font-semibold text-lg mb-3">${q.question}</p>`;
+            const answersEl = document.createElement('div');
+            answersEl.className = 'flex flex-col space-y-2';
+            q.answers.forEach(a => {
+                const button = document.createElement('button');
+                button.className = 'text-left p-3 border rounded-lg hover:bg-gray-100 transition-colors duration-200';
+                button.textContent = a.text;
+                button.dataset.value = a.value;
+                button.dataset.question = index;
+                answersEl.appendChild(button);
+            });
+            questionEl.appendChild(answersEl);
+            quizContainer.appendChild(questionEl);
+        });
+        quizContainer.classList.remove('hidden');
+        recommendationContainer.classList.add('hidden');
+    }
+
+    let quizAnswers = {};
+    quizContainer.addEventListener('click', e => {
+        if (e.target.tagName === 'BUTTON') {
+            const { value, question } = e.target.dataset;
+            quizAnswers[question] = value;
+
+            const parent = e.target.parentElement;
+            Array.from(parent.children).forEach(child => {
+                child.classList.remove('bg-[#81B29A]', 'text-white');
+            });
+            e.target.classList.add('bg-[#81B29A]', 'text-white');
+
+            if (Object.keys(quizAnswers).length === data.quiz.length) {
+                showRecommendation();
+            }
+        }
+    });
+
+    function showRecommendation() {
+        const counts = Object.values(quizAnswers).reduce((acc, v) => {
+            acc[v] = (acc[v] || 0) + 1;
+            return acc;
+        }, {});
+        
+        let recommendation = 'firebase';
+        if ((counts.supabase || 0) >= 2) {
+            recommendation = 'supabase';
+        } else if ((counts.amplify || 0) >=2) {
+            recommendation = 'amplify';
+        } else if (counts.supabase && counts.firebase && counts.supabase > counts.firebase) {
+            recommendation = 'supabase';
+        }
+
+        if (recommendation === 'firebase') {
+            recommendationTitle.textContent = 'Recommendation: Choose Firebase';
+            recommendationText.textContent = 'Your priorities align perfectly with Firebase\'s core strengths. Its unmatched speed and ease of use will help you launch and validate your MVP as quickly as possible.';
+        } else if (recommendation === 'supabase') {
+            recommendationTitle.textContent = 'Recommendation: Consider Supabase';
+            recommendationText.textContent = 'Your focus on relational data, cost control, and avoiding vendor lock-in suggests that an open-source alternative like Supabase is a strategically sounder foundation for your project.';
+        } else {
+            recommendationTitle.textContent = 'Recommendation: Explore AWS Amplify';
+            recommendationText.textContent = 'Your need for enterprise integration and maximum flexibility points towards AWS Amplify. It provides a powerful, if more complex, path to leveraging the full AWS ecosystem.';
+        }
+        
+        quizContainer.classList.add('hidden');
+        recommendationContainer.classList.remove('hidden');
+    }
+
+    resetQuizBtn.addEventListener('click', () => {
+        quizAnswers = {};
+        renderQuiz();
+    });
+
+    renderQuiz();
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 80) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').substring(1) === current) {
+                link.classList.add('active');
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>
