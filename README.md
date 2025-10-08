@@ -2,31 +2,31 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.4.
 
-Action	Command
-git remote -vgit
-Initialize Git	git init
-Add GitHub remote	git remote add origin <repo-url>
-Fetch remote branches	git fetch origin
-Switch/create branch	git checkout -b <branch> [origin/<branch>]
-Add & commit changes	git add . && git commit -m "Message"
-Push to branch	git push -u origin <branch>
+| **Action**                | **Command** |
+|----------------------------|-------------|
+| Check remote repositories  | `git remote -v` |
+| Initialize Git             | `git init` |
+| Add GitHub remote          | `git remote add origin <repo-url>` |
+| Fetch remote branches      | `git fetch origin` |
+| Switch/create branch       | `git checkout -b <branch> [origin/<branch>]` |
+| Add & commit changes       | `git add . && git commit -m "Message"` |
+| Push to branch             | `git push -u origin <branch>` |
 
-```
-git remote add origin https://github.com/MarkoBrie/MVP_with_firebase.git
-git remote -v
-```
+| **Action** | **Command** |
+|-------------|-------------|
+| Create a new folder | `mkdir 8_editor_component` |
+| Move into the folder | `cd 8_editor_component` |
+| Initialize a new Git repository | `git init` |
+| Check repository status | `git status` |
+| Check remote repositories (none yet) | `git remote -v` |
+| Add GitHub repository as remote | `git remote add origin https://github.com/MarkoBrie/MVP_with_firebase.git` |
+| Verify remote was added | `git remote -v` |
+| List all branches again | `git branch -a` |
+| Fetch branches from GitHub | `git fetch origin` |
+| Checkout and track existing branch `7-data-model` | `git checkout 7-data-model` |
+| Create a new branch `8-editor-component` from it | `git checkout -b 8-editor-component` |
+| Push the new branch to GitHub and set upstream tracking | `git push -u origin 8-editor-component` |
 
-If you want to work on a different branch that already exists on GitHub (say chapter-03-api):
-```
-git checkout 7-data-model
-```
-
-If that branch doesn’t exist locally yet, but exists on GitHub:
-```
-git checkout -b 7-data-model origin/7-data-model
-git checkout -b 7-data-model # creates local branch first
-git push -u origin 7-data-model
-```
 
 ## Development server
 
