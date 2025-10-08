@@ -1,0 +1,20 @@
+<div class="max-w-5xl mx-auto p-4 space-y-4">
+    <header class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+      <h1 class="text-2xl font-bold">Activities <span class="text-gray-500 text-base">({{ activities.length }})</span></h1>
+
+    </header>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      @for (p of activities; track p.id) {
+        <a [routerLink]="['/place', p.id]" class="block rounded-xl border p-4 hover:shadow">
+          <div class="text-xs text-gray-500">{{ p.category }} • {{ p.location }}</div>
+          <h2 class="text-lg font-semibold">{{ p.name }}</h2>
+          <p class="text-sm text-gray-700 line-clamp-3">{{ p.description }}</p>
+          <p class="text-xs text-gray-500 mt-2">{{ p.address }}</p>
+        </a>
+      }
+      @if (!activities.length) {
+        <div class="col-span-full text-gray-500">No places found.</div>
+      }
+    </div>
+</div>

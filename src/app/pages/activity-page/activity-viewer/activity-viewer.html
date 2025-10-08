@@ -1,0 +1,30 @@
+<p>activity-viewer works!</p>
+
+<div class="max-w-3xl mx-auto p-4 space-y-4">
+    <a routerLink="/" class="text-blue-600 hover:underline">← Back</a>
+
+    @if (activity()) {
+      <div class="rounded-2xl border p-6 space-y-3 bg-white">
+        <div class="text-sm text-gray-500">{{ activity()?.category }} • {{ activity()?.location }}</div>
+        <h1 class="text-2xl font-bold">{{ activity()?.name }}</h1>
+        <p class="text-gray-700">{{ activity()?.description }}</p>
+
+        <div class="text-sm">
+          <div class="text-gray-600">{{ activity()?.address }}</div>
+          @if (activity()?.website) {
+            <a [href]="activity()?.website" target="_blank" rel="noopener" class="text-blue-600 underline">
+              {{ host(activity()?.website!) }}
+            </a>
+          }
+        </div>
+
+        <div class="pt-2">
+          <a [href]="maps(activity()!)" target="_blank" class="inline-flex items-center gap-2 text-sm rounded-lg border px-3 py-1">
+            Open in Maps
+          </a>
+        </div>
+      </div>
+    } @else {
+      <p class="text-center text-gray-500">activity not found.</p>
+    }
+  </div>
