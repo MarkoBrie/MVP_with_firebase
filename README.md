@@ -2,6 +2,32 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.4.
 
+Action	Command
+git remote -vgit
+Initialize Git	git init
+Add GitHub remote	git remote add origin <repo-url>
+Fetch remote branches	git fetch origin
+Switch/create branch	git checkout -b <branch> [origin/<branch>]
+Add & commit changes	git add . && git commit -m "Message"
+Push to branch	git push -u origin <branch>
+
+```
+git remote add origin https://github.com/MarkoBrie/MVP_with_firebase.git
+git remote -v
+```
+
+If you want to work on a different branch that already exists on GitHub (say chapter-03-api):
+```
+git checkout 7-data-model
+```
+
+If that branch doesn’t exist locally yet, but exists on GitHub:
+```
+git checkout -b 7-data-model origin/7-data-model
+git checkout -b 7-data-model # creates local branch first
+git push -u origin 7-data-model
+```
+
 ## Development server
 
 To start a local development server, run:
@@ -9,6 +35,7 @@ To start a local development server, run:
 ```bash
 ng serve
 ```
+
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
