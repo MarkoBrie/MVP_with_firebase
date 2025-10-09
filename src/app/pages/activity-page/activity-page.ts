@@ -13,12 +13,12 @@ export class ActivityPage {
 
   activityService = inject(ActivityService)
   
-  activities: any[] = [];
+  activites: any[] = [];
   
   constructor() {}
 
   //angular method called when a component is initialised
   ngOnInit(){
-    this.activities = this.activityService.list()
+    this.activites = this.activityService.list()
   }
 }
