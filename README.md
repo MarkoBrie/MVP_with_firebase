@@ -25,7 +25,7 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 | Fetch branches from GitHub | `git fetch origin` |
 | Checkout and track existing branch `7-data-model` | `git checkout 7-data-model` |
 | Create a new branch `8-editor-component` from it | `git checkout -b 8-editor-component` |
-| Push the new branch to GitHub and set upstream tracking | `git push -u origin 8-editor-component` |
+| Push the new branch to GitHub and set upstream tracking | `git push -u origin 9-app-structure` |
 
 
 ## Development server
