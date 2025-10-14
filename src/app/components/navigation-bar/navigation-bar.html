@@ -1,0 +1,64 @@
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+
+      <!-- Brand -->
+      <a routerLink="/" class="flex items-center gap-2">
+        <img src="/logo.png" alt="" class="h-6 w-6"/>
+        <span class="font-semibold">Activity<span class="text-blue-600">App</span></span>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-6">
+        <a routerLink="/" routerLinkActive="text-blue-600" [routerLinkActiveOptions]="{exact:true}"
+           class="text-sm text-gray-700 hover:text-gray-900">Home</a>
+    <!--     <a routerLink="/challenges" routerLinkActive="text-blue-600"
+           class="text-sm text-gray-700 hover:text-gray-900">Activities</a>
+        <a routerLink="/about" routerLinkActive="text-blue-600"
+           class="text-sm text-gray-700 hover:text-gray-900">About</a>-->
+      </nav>
+
+      <!-- Login -->
+      <!-- Right actions -->
+      <div class="hidden md:flex items-center gap-3">
+        <a routerLink="/login" class="text-sm text-gray-700 hover:text-gray-900">Log in</a>
+        <a routerLink="/signup"
+           class="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Get started</a>
+      </div>
+
+      <!-- Mobile menu button -->
+      <button type="button" (click)="open.set(!open())"
+              class="md:hidden inline-flex items-center justify-center p-2 rounded-lg hover:bg-gray-100"
+              aria-label="Toggle menu" aria-expanded="{{ open() }}">
+        @if(!open()){
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+             d="M4 6h16M4 12h16M4 18h16"/></svg>
+        }@else {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+             d="M6 18L18 6M6 6l12 12"/></svg>
+        }
+      </button>
+    </div>
+
+    <!-- Mobile drawer -->
+     @if(open()){
+    <div class="md:hidden">
+      <div class="px-4 pb-4 space-y-2 border-t border-gray-200 bg-white">
+        <a routerLink="/" [routerLinkActiveOptions]="{exact:true}" routerLinkActive="!text-gray-900 text-blue-600"
+           class="block py-2 text-gray-700">Home</a>
+        <a routerLink="/challenges" routerLinkActive="!text-gray-900 text-blue-600"
+           class="block py-2 text-gray-700">Challenges</a>
+        <a routerLink="/about" routerLinkActive="!text-gray-900 text-blue-600"
+           class="block py-2 text-gray-700">FAQ</a>
+        <div class="pt-2 flex gap-3">
+          <a routerLink="/login" class="text-sm text-gray-700 py-2">Log in</a>
+          <a routerLink="/signup"
+             class="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white">Get started</a>
+        </div>
+      </div>
+    </div>
+     }
+
+
+  </header>
