@@ -1,320 +1,165 @@
-# Application Structure
 
-What we are missing now is the more standard parts of a an application:
+# 4. Email Login
 
-- landing page
-- navigation bar
-- footer
+- Enabling **email** login in Firebase
+- Adding code for **registering new users**
 
-```
-+--------------------------------------------------------------------------------------------+
-| LOGO       | Home | Activities | About | Contact                  | Search [____] | [New]  |
-+--------------------------------------------------------------------------------------------+
-| HERO SECTION                                                                               |
-| ------------------------------------------------------------------------------------------ |
-|  [Big Headline: Discover great places]                [ Call to Action ]   [ Illustration ]|
-|  Short subheading that explains value proposition.                                         |
-|                                                                                            |
-+--------------------------------------------------------------------------------------------+
-| FEATURES / CATEGORIES                                                                      |
-| ------------------------------------------------------------------------------------------ |
-|  [Theatre]   [Museums]   [Restaurants]   [Parks]   [Workshops]                             |
-|  Quick cards with title, short description, location, and small image/icon                 |
-+--------------------------------------------------------------------------------------------+
-| ACTIVITY LIST / HIGHLIGHTS                                                                 |
-| ------------------------------------------------------------------------------------------ |
-+--------------------------------------------------------------------------------------------+
-| LOGO  •  © 2025 YourAppName                     Links: Terms | Privacy | Help | Contact    |
-| Follow: [Twitter] [Instagram] [LinkedIn]                     Built with ❤️ and Angular     |
-+--------------------------------------------------------------------------------------------+
+## Enabling **email** login in Firebase
+You need to go back to the authentication section of firebase and add in email:
 
-```
+![](https://firebasestorage.googleapis.com/v0/b/mvp-template-dbd61.firebasestorage.app/o/089e62b6-7539-4b19-b762-56f1c448d0a4.webp?alt=media&token=3d1b925e-215a-4b8b-91b8-c8236579bc87)
 
-These items are kind of critical for any modern application. We would also suggest that for SEO and general site usability you would probably require (and you should start to prepare):
+Authentication through *email* is slightly different as we need to **create accounts** through a **sign-up process** before we can actually login.
 
-- FAQ: frequently asked questions
-- Contact form: either by email or by internal form
-- login/logout/signup/profiles pages
+## Adding Sign Up process 
 
-There are also different images and icons that are required as well as different resources that you are likely ro need:
+The *[(ngModel)]* syntax, which we are using for *two-way data binding* on our email and password inputs, is part of Angular's **FormsModule**. Because we are using a standalone component, we must explicitly import any modules we need directly into that component.
 
-- terms and conditions
-- social media links
-- contact emails.
+So we add some more calls to auth now and create **login by email**:
 
-In this module we cover **navigation bar** and **footer**.
+Add the below code to **login-page.ts**.
 
-## Navigation Bar
-
-```
-ng g c components/navigation-bar --standalone
-```
-
-This creates:
-
-```
-src/app/components/navbar/
-  ├── navigation-bar.ts
-  ├── navigation-bar.html
-  ├── navigation-bar.css
-  └── navigation-bar.spec.ts
-```
-You can delete *.spec* and *.css*.
-
-Add the below code to **navigation-bar.ts**.
-
-```
-import { Component, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-
-@Component({
-  selector: 'navbar',
-  standalone: true,
-  imports: [RouterLink, RouterLinkActive],
-  templateUrl: "./navigation-bar.html",
-})
-export class NavigationBar {
-  open = signal(false);
-}
-```
-
-And then for the viewer in **navigation-bar.ts**:
-
-```
-  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-
-      <!-- Brand -->
-      <a routerLink="/" class="flex items-center gap-2">
-        <img src="logo.png" alt="" class="h-6 w-6"/>
-        <span class="font-semibold">Activity<span class="text-blue-600">App</span></span>
-      </a>
-
-      <!-- Desktop nav -->
-      <nav class="hidden md:flex items-center gap-6">
-        <a routerLink="/" routerLinkActive="text-blue-600" [routerLinkActiveOptions]="{exact:true}"
-           class="text-sm text-gray-700 hover:text-gray-900">Home</a>
-        <a routerLink="/challenges" routerLinkActive="text-blue-600"
-           class="text-sm text-gray-700 hover:text-gray-900">Activities</a>
-        <a routerLink="/about" routerLinkActive="text-blue-600"
-           class="text-sm text-gray-700 hover:text-gray-900">About</a>
-      </nav>
-
-      <!-- Right actions -->
-      <div class="hidden md:flex items-center gap-3">
-        <a routerLink="/login" class="text-sm text-gray-700 hover:text-gray-900">Log in</a>
-        <a routerLink="/signup"
-           class="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Get started</a>
-      </div>
-
-      <!-- Mobile menu button -->
-      <button type="button" (click)="open.set(!open())"
-              class="md:hidden inline-flex items-center justify-center p-2 rounded-lg hover:bg-gray-100"
-              aria-label="Toggle menu" aria-expanded="{{ open() }}">
-        @if(!open()){
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-             d="M4 6h16M4 12h16M4 18h16"/></svg>
-        }@else {
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-             d="M6 18L18 6M6 6l12 12"/></svg>
-        }
-      </button>
-    </div>
-
-    <!-- Mobile drawer -->
-     @if(open()){
-    <div class="md:hidden">
-      <div class="px-4 pb-4 space-y-2 border-t border-gray-200 bg-white">
-        <a routerLink="/" [routerLinkActiveOptions]="{exact:true}" routerLinkActive="!text-gray-900 text-blue-600"
-           class="block py-2 text-gray-700">Home</a>
-        <a routerLink="/challenges" routerLinkActive="!text-gray-900 text-blue-600"
-           class="block py-2 text-gray-700">Challenges</a>
-        <a routerLink="/about" routerLinkActive="!text-gray-900 text-blue-600"
-           class="block py-2 text-gray-700">FAQ</a>
-        <div class="pt-2 flex gap-3">
-          <a routerLink="/login" class="text-sm text-gray-700 py-2">Log in</a>
-          <a routerLink="/signup"
-             class="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white">Get started</a>
-        </div>
-      </div>
-    </div>
-     }
-
-
-  </header>
-  ```
-Add your logo in the **/public/** folder.
-
-And now in **app.html** we need the bar to stay fixed above the dynamic content so we will add:
-
-```
-<navbar></navbar>
-<router-outlet ></router-outlet>
-```
-
-Finally, add the following code to **app.ts**:
-
-```
+```ts
 import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { ActivityService } from './services/activity-service';
-import { NavigationBar } from './components/navigation-bar/navigation-bar';
-
+import { FormsModule } from '@angular/forms'; // <-- used for ngModel and two-way binding in password and email inputs
+import { Auth, signInWithEmailAndPassword, User } from '@angular/fire/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from '@firebase/fire/auth';
+import { timer } from 'rxjs';
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet, NavigationBar],//, ActivityPage],
+  selector: 'app-login-page',
+  imports: [FormsModule],
   standalone: true,
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  templateUrl: './login-page.html'
 })
-export class App {
-  protected readonly title = signal('activity-angular-app');
-  private activityService = inject(ActivityService);
+export class LoginPage {
 
-  //get activites() {
-  //  return this.activityService.list();
-  //}
+  user = signal<User | null>(null);
+  private auth = inject(Auth);
+  email = "";
+  password = ""
+
+  constructor() {
+    onAuthStateChanged(this.auth, (user) => {
+      console.log("do we have a user", user)
+      this.user.set(user);
+    });
+  }
+
+  async signInWithGoogle() {
+    await signInWithPopup(this.auth, new GoogleAuthProvider());
+  }
+
+    async signout() {
+    timer(1000).subscribe(() => {
+      this.auth.signOut();
+      //this.router.navigateByUrl("/");//optionally route away from normally logout page
+    });
+  }
+
+  async signUpWithEmail() {
+    await createUserWithEmailAndPassword(this.auth, this.email, this.password);
+  }
+
+  async signInWithEmailAndPassword() {
+    try{
+      await signInWithEmailAndPassword(this.auth, this.email, this.password);
+    }catch(err){
+      console.log(err)
+    }
+  }
 }
 ```
 
-After this the page should render:
+Firstly lets ask GPT to create a nicer email login ;-)
+
+Add the below code to **login-page.html**:
+
+```html
+<div class="m-12">
+    <p>Login Page</p>
+    
+    @if(!user()){
+        <button (click)="signInWithGoogle()" class="rounded bg-neutral-900 text-white px-3 py-1">Sign in With Google</button>
+    }@else {
+        <button (click)="signout()" class="rounded bg-neutral-900 text-white px-3 py-1">Logout</button>
+    }
+    
+    
 
 
-![](https://firebasestorage.googleapis.com/v0/b/mvp-template-dbd61.firebasestorage.app/o/237ab85a-8ee8-4a77-8452-e38cad87663d.webp?alt=media&token=fe6a58ba-b619-4295-a9d4-eee89c9137fe)
+    <div class="m-8 flex flex-col gap-8">
+<!-- Make sure FormsModule is imported in this component -->
+<div class="flex w-full max-w-sm flex-col gap-3">
+  <label for="email" class="text-sm font-medium text-neutral-700">Email</label>
+  <input
+    id="email"
+    name="email"
+    type="email"
+    [(ngModel)]="email"
+    placeholder="you@example.com"
+    autocomplete="email"
+    class="rounded border px-3 py-2"
+    required
+  />
 
-So the next things to do are:
+  <label for="password" class="text-sm font-medium text-neutral-700">Password</label>
+  <input
+    id="password"
+    name="password"
+    type="password"
+    [(ngModel)]="password"
+    placeholder="••••••••"
+    autocomplete="current-password"
+    class="rounded border px-3 py-2"
+    required
+  />
 
-- do exactly the same as above for the footer
-- create the other pages: landing or home and faq.
-- add in the routes to these pages and update the navbar
+  <button
+    type="button"
+    class="rounded bg-neutral-900 px-3 py-2 text-white disabled:opacity-50"
+    (click)="signInWithEmailAndPassword()"
+    [disabled]="!email || !password"
+  >
+    Email Login
+  </button>
+</div>
+    <div>{{user()?.displayName}}</div>
+</div>
 
-## Footer
-
-Create a footer:
-
+    <div>User state {{user()?.displayName}}</div>
+</div>
 ```
-ng g c components/footer
-```
+When we login it will fail with a cryptic message:
 
-in **footer.ts** add:
+![](https://firebasestorage.googleapis.com/v0/b/mvp-template-dbd61.firebasestorage.app/o/d89fd813-2259-4e82-9ca6-93c94cae03a7.webp?alt=media&token=bfd98a73-7ab3-4f1b-b0b0-c969e408a8c2)
 
-```
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+but it means we have never logged in before so no account for email. Email authentication is stored in firebase so you have to create an account rather than a reference. So lets sign in first:
 
-@Component({
-  selector: 'app-footer',
-  standalone: true,
-  imports: [RouterLink],
-  templateUrl: "./footer.html",
-})
-export class FooterComponent {
-  year = new Date().getFullYear();
-}
-```
+```html
+  <div class="flex w-full gap-4">
+  <button
+    type="button"
+    class="rounded bg-neutral-900 px-3 py-2 text-white disabled:opacity-50"
+    (click)="signInWithEmailAndPassword()"
+    [disabled]="!email || !password"
+  >
+    Email Login
+  </button>
 
-and the **footer.html** would be something like: 
-
-```
-<footer class="border-t border-gray-200 bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm">
-        <div>
-          <div class="font-semibold mb-2">ActivityApp</div>
-          <p class="text-gray-600">Curate and create local activities for your guests and future friends.</p>
-        </div>
-
-        <div>
-          <div class="font-semibold mb-2">Product</div>
-          <ul class="space-y-1 text-gray-600">
-            <li><a routerLink="/activities" class="hover:text-gray-900">Activities</a></li>
-            <li><a routerLink="/pricing" class="hover:text-gray-900">Pricing</a></li>
-            <li><a routerLink="/faq" class="hover:text-gray-900">FAQ</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <div class="font-semibold mb-2">Company</div>
-          <ul class="space-y-1 text-gray-600">
-            <li><a routerLink="/about" class="hover:text-gray-900">About</a></li>
-            <li><a routerLink="/contact" class="hover:text-gray-900">Contact</a></li>
-            <li><a routerLink="/careers" class="hover:text-gray-900">Careers</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <div class="font-semibold mb-2">Legal</div>
-          <ul class="space-y-1 text-gray-600">
-            <li><a routerLink="/privacy" class="hover:text-gray-900">Privacy</a></li>
-            <li><a routerLink="/terms" class="hover:text-gray-900">Terms</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-        <div>© {{ year }} ActivityApp. All rights reserved.</div>
-        <div class="flex items-center gap-4">
-          <a href="https://twitter.com/yourhandle" target="_blank" rel="noopener" class="hover:text-gray-700">Twitter</a>
-          <a href="https://github.com/yourrepo" target="_blank" rel="noopener" class="hover:text-gray-700">GitHub</a>
-          <a href="mailto:hello@example.com" class="hover:text-gray-700">Email</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-```
-
-Clearly you might not need all of these different pages but its to give you an idea of what you should do. 
-
-Note: don't call the selector footer as it would conflict with the html element footer. 
-
-In our **app.html** we can now finalise the viewer:
-
-```
-<navbar />
-<main class="min-h-screen">
-    <router-outlet />
-</main>
-<app-footer></app-footer>
-
+  <button
+    type="button"
+    class="rounded bg-neutral-900 px-3 py-2 text-white disabled:opacity-50"
+    (click)="signUpWithEmail()"
+    [disabled]="!email || !password"
+  >
+    Email Signup
+  </button>
+</div>
 ```
 
-Finally, add the component to **app.ts**:
+Add a second button that will call our signup method. And now we get a new login 
 
-``` 
-import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-//import { ActivityPage } from './pages/activity-page/activity-page';
-import { ActivityService } from './services/activity-service';
-import { NavigationBar } from './components/navigation-bar/navigation-bar';
-import { FooterComponent } from './components/footer/footer';
+![](https://firebasestorage.googleapis.com/v0/b/mvp-template-dbd61.firebasestorage.app/o/95009187-6ce0-4785-8cd0-607ba4400a2f.webp?alt=media&token=4fddf2ef-64bd-4b61-95b1-b4b288ad8708)
 
-
-@Component({
-  selector: 'app-root',
-  imports: [RouterOutlet, NavigationBar, FooterComponent],
-  standalone: true,
-  templateUrl: './app.html',
-  styleUrl: './app.css'
-})
-export class App {
-  protected readonly title = signal('activity-angular-app');
-  private activityService = inject(ActivityService);
-
-  //get activites() {
-  //  return this.activityService.list();
-  //}
-}
-```
-
-Note that we add some styling to the content area so that it takes the height of the screen even if there isn't much to see.
-
-
-
-![](https://firebasestorage.googleapis.com/v0/b/mvp-template-dbd61.firebasestorage.app/o/ea407204-9ec0-460e-b769-2c8fcd6e7002.webp?alt=media&token=44612020-f10f-4a0b-ab36-78b6f18cab92)
-
-## Next
-
-In the next section we will vibe code our way to a landing page.
+There are two things to note now that the user has been created so we can't create a new account with the same credentials again, we would need to login next time (not sign up)
