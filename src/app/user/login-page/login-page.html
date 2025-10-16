@@ -1,13 +1,17 @@
-<div class="m-12">
-    <p>Login Page</p>
-    @if(!user()){
-    <button (click)="signInWithGoogle()" class="rounded bg-neutral-900 text-white px-3 py-1">Sign in With Google</button>
-    }@else {
-    <button (click)="signout()" class="rounded bg-neutral-900 text-white px-3 py-1">Logout</button>
-    }
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
 
-    <div class="m-8 flex flex-col gap-8">
-        <div class="flex w-full max-w-sm flex-col gap-3">
+    <div class="m-12 p-8 bg-white rounded-lg shadow-md">
+        <p class="text-xl font-semibold text-center mb-6">Login Page</p>
+
+        <div class="text-center mb-6">
+            @if(!user()){
+            <button (click)="signInWithGoogle()" class="rounded bg-neutral-900 text-white px-4 py-2 w-full max-w-sm">Sign in With Google</button>
+            }@else {
+            <button (click)="signout()" class="rounded bg-red-600 text-white px-4 py-2 w-full max-w-sm">Logout</button>
+            }
+        </div>
+
+        <div class="flex w-full max-w-sm flex-col gap-3 mx-auto">
             <label for="email" class="text-sm font-medium text-neutral-700">Email</label>
             <input
                 id="email"
@@ -32,7 +36,7 @@
                 required
             />
 
-            <div class="flex gap-2">
+            <div class="flex gap-2 mt-4">
                 <button
                     type="button"
                     class="flex-1 rounded bg-neutral-900 px-3 py-2 text-white disabled:opacity-50"
@@ -53,6 +57,11 @@
             </div>
         </div>
         
-        <div>User state: {{ user()?.email }}</div>
+        @if(user()){
+        <div class="mt-6 text-center text-sm text-gray-600">
+            <p>Logged in as: {{ user()?.email }}</p>
+        </div>
+        }
     </div>
+
 </div>
