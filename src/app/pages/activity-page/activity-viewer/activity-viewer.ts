@@ -26,6 +26,14 @@ export class ActivityViewer {
     }
   }
 
+  //async ngOnInit() {
+  //  const id = this.route.snapshot.paramMap.get('id');
+  //  if (id) {
+  //    const fetchedActivity = await this.activityService.get(id);
+  //    this.activity.set(fetchedActivity);
+  //  }
+  //}
+
   host(url: string) { try { return new URL(url).host.replace(/^www\./,''); } catch { return url; } }
   maps(p: any) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address || p.name)}`; }
 }

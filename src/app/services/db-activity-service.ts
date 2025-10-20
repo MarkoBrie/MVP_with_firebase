@@ -7,8 +7,10 @@ import {
   updateDoc,
   deleteDoc,
   getDoc,
+  getDocs, // new version 
+  serverTimestamp // new version
 } from "@angular/fire/firestore";
-import { getDocs, serverTimestamp } from "firebase/firestore";
+//import { getDocs, serverTimestamp } from "firebase/firestore"; // old version
 import { Activity } from "../models/activity";
 
 

@@ -20,7 +20,6 @@ export class ActivityEditor {
     // Define the list of categories
   categories = ['Theatre', 'Museum', 'Restaurant', 'Park', 'Workshop', 'Historic Site'];
 
-
   form = this.fb.group({
     name:        ['', Validators.required],
     category:    [this.categories[0], Validators.required],

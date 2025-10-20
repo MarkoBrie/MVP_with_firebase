@@ -23,4 +23,9 @@ export class ActivityPage {
       this.activites = activities;
     })
   }
+
+
+  //async ngOnInit() {
+  //  this.activites = await this.activityService.list();
+  //}
 }
