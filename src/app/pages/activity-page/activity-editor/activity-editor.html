@@ -10,10 +10,22 @@
           <label class="text-sm">Name</label>
           <input class="border rounded px-3 py-2 w-full" formControlName="name">
         </div>
+        <!-- Alternative category with textarea
         <div>
           <label class="text-sm">Category</label>
           <input class="border rounded px-3 py-2 w-full" formControlName="category" placeholder="Theatre">
         </div>
+        End alternative -->
+        <!-- Alternative with select dropdown -->
+        <div>
+          <label class="text-sm">Category</label>
+          <select class="border rounded px-3 py-2 w-full" formControlName="category">
+            @for (category of categories; track category) {
+              <option [value]="category">{{ category }}</option>
+            }
+          </select>
+        </div>
+        <!-- End alternative -->
         <div>
           <label class="text-sm">City</label>
           <input class="border rounded px-3 py-2 w-full" formControlName="location" placeholder="Paris">

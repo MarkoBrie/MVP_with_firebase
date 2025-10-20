@@ -1,6 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ActivityService } from '../../../services/activity-service';
+import { Activity } from '../../../models/activity';
+import { DbActivityService } from '../../../services/db-activity-service';
+
 
 @Component({
   selector: 'app-activity-viewer',
@@ -10,14 +13,19 @@ import { ActivityService } from '../../../services/activity-service';
 })
 export class ActivityViewer {
   private route = inject(ActivatedRoute);
-  private activityService = inject(ActivityService);
+  private activityService = inject(DbActivityService);
 
-  activity = computed(() => {
+  activity = signal<Activity | null>(null);
+
+  ngOnInit(){
     const id = this.route.snapshot.paramMap.get('id');
-    return id ? this.activityService.get(id) : undefined;
-  });
+    if(id){
+      this.activityService.get(id).then(activity => {
+      this.activity.set(activity)
+    })
+    }
+  }
 
   host(url: string) { try { return new URL(url).host.replace(/^www\./,''); } catch { return url; } }
   maps(p: any) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address || p.name)}`; }
-
 }

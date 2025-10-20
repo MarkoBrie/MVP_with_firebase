@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ActivityService } from '../../services/activity-service';
-
+import { Activity } from '../../models/activity';
+import { DbActivityService } from '../../services/db-activity-service';
 
 @Component({
   selector: 'activity-list',
@@ -11,14 +12,15 @@ import { ActivityService } from '../../services/activity-service';
 })
 export class ActivityPage {
 
-  activityService = inject(ActivityService)
-  
-  activites: any[] = [];
+  activityService = inject(DbActivityService)
+  activites: Activity[] = [];
   
   constructor() {}
 
   //angular method called when a component is initialised
   ngOnInit(){
-    this.activites = this.activityService.list()
+    this.activityService.list().then(activities => {
+      this.activites = activities;
+    })
   }
 }
