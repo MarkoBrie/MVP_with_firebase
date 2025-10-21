@@ -17,12 +17,17 @@
            class="text-sm text-gray-700 hover:text-gray-900">About</a>-->
       </nav>
 
-      <!-- Login -->
-      <!-- Right actions -->
+      <!-- Login with check for logged in user -->
+      <!-- Right actions -->    
       <div class="hidden md:flex items-center gap-3">
-        <a routerLink="/login" class="text-sm text-gray-700 hover:text-gray-900">Log in</a>
-        <a routerLink="/signup"
-           class="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Get started</a>
+        @if(!user()){
+          <a routerLink="/login" class="text-sm text-gray-700 hover:text-gray-900">Log in</a>
+          <a routerLink="/signup"
+            class="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Get started</a>
+        }@else {
+          <a>Logged in as {{user()?.displayName}}</a>
+          <a routerLink="/login" class="text-sm text-gray-700 hover:text-gray-900">Logout</a>
+        }
       </div>
 
       <!-- Mobile menu button -->

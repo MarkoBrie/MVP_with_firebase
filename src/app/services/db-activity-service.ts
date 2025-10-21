@@ -12,10 +12,12 @@ import {
 } from "@angular/fire/firestore";
 //import { getDocs, serverTimestamp } from "firebase/firestore"; // old version
 import { Activity } from "../models/activity";
+import { Auth } from "@angular/fire/auth"; // used for adding userID to activities
 
 
 @Injectable({ providedIn: "root" })
 export class DbActivityService {
+  private auth = inject(Auth); // used for adding userID to activities
   // Use Angular's `inject` function to get an instance of the Firestore service.
   private db = inject(Firestore);
   // Define a constant for the collection name to avoid "magic strings" and make it easy to change.
@@ -38,8 +40,18 @@ export class DbActivityService {
 
   /** Create a Activity and return its new id. */
   async add(data:Activity): Promise<string> {
+    // 3. Get the current user from the Auth service.
+    const user = this.auth.currentUser;
+    console.log("do we have a user", user?.uid)
+    // 4. Ensure a user is logged in before adding.
+    if (!user) {
+      throw new Error("User must be logged in to create an activity.");
+    }
+    // 5. Attach the userID to the activity data.
     const res = await addDoc(collection(this.db, this.COLLECTION), {
       ...data,
+      userId: user.uid, // 5. Add the user's unique ID to the document.
+      createdAt: serverTimestamp() // It's good practice to add a creation timestamp.
     });
     return res.id;
   }
