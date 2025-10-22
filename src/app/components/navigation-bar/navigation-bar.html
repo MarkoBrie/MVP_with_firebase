@@ -25,7 +25,11 @@
           <a routerLink="/signup"
             class="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Get started</a>
         }@else {
-          <a>Logged in as {{user()?.displayName}}</a>
+          <a>Logged in as {{user()?.displayName}} 
+          <!-- @if(profile()){
+              <img class="w-8 h-8 rounded-full" [src]="profile().avatar" />
+          }--> 
+          </a>
           <a routerLink="/login" class="text-sm text-gray-700 hover:text-gray-900">Logout</a>
         }
       </div>
