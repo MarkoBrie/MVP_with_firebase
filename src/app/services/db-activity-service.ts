@@ -10,7 +10,6 @@ import {
   getDocs, // new version 
   serverTimestamp // new version
 } from "@angular/fire/firestore";
-//import { getDocs, serverTimestamp } from "firebase/firestore"; // old version
 import { Activity } from "../models/activity";
 import { Auth } from "@angular/fire/auth"; // used for adding userID to activities
 
