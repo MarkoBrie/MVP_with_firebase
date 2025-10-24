@@ -1,22 +1,13 @@
-<p>activity-editor works!</p>
-
 <div class="max-w-3xl mx-auto p-4 space-y-4">
-    <a routerLink="/" class="text-blue-600 hover:underline">← Back</a>
-    <h1 class="text-2xl font-bold">Add an activity</h1>
+    <a routerLink="/activities" class="text-blue-600 hover:underline">← Back</a>
+    <h1 class="text-2xl font-bold">Add a place</h1>
 
-    <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
+    <div (ngSubmit)="save()" class="space-y-3">
       <div class="grid sm:grid-cols-2 gap-3">
         <div>
           <label class="text-sm">Name</label>
-          <input class="border rounded px-3 py-2 w-full" formControlName="name">
+          <input [(ngModel)]="activity().name" class="border rounded px-3 py-2 w-full">
         </div>
-        <!-- Alternative category with textarea
-        <div>
-          <label class="text-sm">Category</label>
-          <input class="border rounded px-3 py-2 w-full" formControlName="category" placeholder="Theatre">
-        </div>
-        End alternative -->
-        <!-- Alternative with select dropdown -->
         <div>
           <label class="text-sm">Category</label>
           <select class="border rounded px-3 py-2 w-full" formControlName="category">
@@ -25,27 +16,32 @@
             }
           </select>
         </div>
-        <!-- End alternative -->
+        <div class="col-span-2">
+          <image-component 
+            [(value)]="image" 
+            [preview]="activity().image">
+          </image-component>
+        </div>
         <div>
           <label class="text-sm">City</label>
-          <input class="border rounded px-3 py-2 w-full" formControlName="location" placeholder="Paris">
+          <input [(ngModel)]="activity().location.name" class="border rounded px-3 py-2 w-full" placeholder="Paris">
         </div>
         <div>
           <label class="text-sm">Website</label>
-          <input class="border rounded px-3 py-2 w-full" formControlName="website" placeholder="https://…">
+          <input [(ngModel)]="activity().website" class="border rounded px-3 py-2 w-full" placeholder="https://…">
         </div>
       </div>
 
       <div>
         <label class="text-sm">Address</label>
-        <input class="border rounded px-3 py-2 w-full" formControlName="address">
+        <input [(ngModel)]="activity().location.address" class="border rounded px-3 py-2 w-full">
       </div>
 
       <div>
         <label class="text-sm">Description</label>
-        <textarea class="border rounded px-3 py-2 w-full" rows="4" formControlName="description"></textarea>
+        <textarea [(ngModel)]="activity().description" class="border rounded px-3 py-2 w-full" rows="4"></textarea>
       </div>
 
-      <button class="rounded-lg bg-blue-600 text-white px-4 py-2" [disabled]="form.invalid">Save</button>
-    </form>
+      <button (click)="save()" class="rounded-lg bg-blue-600 text-white px-4 py-2">Save</button>
+    </div>
   </div>

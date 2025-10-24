@@ -12,4 +12,6 @@ export interface Activity {
   website?: string;
   description?: string;
   address?: string;
+  createdAt?: Date; //we want the date
+  image?: string;
 }

@@ -1,23 +1,25 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ActivityService } from '../../../services/activity-service';
 import { Activity } from '../../../models/activity';
 import { DbActivityService } from '../../../services/db-activity-service';
+import { ImageComponent } from '../../../components/image-component/image-component';
+import { ImageService } from '../../../services/image-service';
 
 @Component({
   standalone: true,
   selector: 'activity-edit',
-  imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: "./activity-editor.html"
+  imports: [ReactiveFormsModule, RouterLink, FormsModule, ImageComponent],
+  templateUrl: './activity-editor.html',
 })
 export class ActivityEditor {
   private fb = inject(FormBuilder);
   private activityService = inject(DbActivityService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  imageService = inject(ImageService)
 
-    // Define the list of categories
+      // Define the list of categories
   categories = ['Theatre', 'Museum', 'Restaurant', 'Park', 'Workshop', 'Historic Site'];
 
   form = this.fb.group({
@@ -29,33 +31,57 @@ export class ActivityEditor {
     description: [''],
   });
 
-  activity = signal<Activity | null>(null);
+  activity = signal<Activity>({
+    location: {
+      name: '',
+      address: '',
+      placeId: '',
+    },
+    name: '',
+    category: '',
+    image: undefined
+  });
 
-  ngOnInit(){
+  image: File | null = null;
+
+  ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    if(id){
-      this.activityService.get(id).then(activity => {
-      this.activity.set(activity)
-    })
+    if (id) {
+      this.activityService.get(id).then((activity) => { //if there is an activity we set it
+        if (activity) {
+          this.activity.set(activity);
+        }//implicitly its a new activity
+      });
     }
   }
 
-
   save() {
-    if (this.form.invalid) return;
-    const formValue = this.form.value;
-    const activity: Activity = {
-      name: formValue.name ?? '',
-      category: formValue.category ?? '',
-      location: {
-        name: formValue.location ?? '', 
-        address: formValue.address ?? '',
-        placeId: ''
-      },
-      website: formValue.website ?? '',
-      description: formValue.description ?? ''
-    };
-    this.activityService.add(activity);
-    this.router.navigateByUrl('/');
+   //we have now split the save
+    if(this.image){
+      this.imageService.saveImage("/activities/beta", 
+        this.image, 
+        this.image.name,  
+        (done:string) => {
+          this.activity().image = done;
+          this.doSave();
+      })
+    }else{
+      this.doSave();
+    }
+  }
+
+  private doSave(){
+    //TODO you would want to do your own validate here ...
+    //if we came here from an activity we want to update not create a new one.
+    const tmp = this.activity();
+    if (tmp && tmp.id) {//if there is an id then its an existing activity
+      this.activityService.update(tmp.id, this.activity()).then(() => {
+        this.router.navigateByUrl('/activity/' + this.activity().id);
+      });
+    } else { //its a new one so we create one and use the new id to route
+      this.activityService.add(this.activity()).then((done) => {
+        this.router.navigateByUrl('/activity/' + done);
+      });
+    }
   }
 }

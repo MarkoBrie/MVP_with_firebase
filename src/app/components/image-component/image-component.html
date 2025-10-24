@@ -1,0 +1,41 @@
+<div class="flex flex-col gap-2">
+  @if(label()){
+  <label class="text-sm font-medium">{{ label() }}</label>
+  }
+  <div
+    class="w-full p-4 border border-dashed rounded-lg text-center cursor-pointer hover:bg-gray-50"
+    (drop)="onDrop($event)"
+    (dragover)="allowDrop($event)"
+  >
+    @if (!preview) {
+    <div>
+      <p class="text-gray-400">Drag & drop or click to upload</p>
+      <input
+        type="file"
+        class="hidden"
+        [accept]="accept()"
+        capture="environment"
+        (change)="onFileSelected($event)"
+        #fileInput
+      />
+      <button
+        type="button"
+        class="text-sm text-blue-500"
+        (click)="fileInput.click()"
+      >
+        Choose File
+      </button>
+    </div>
+    } @if (preview) {
+
+    <div class="mt-2 flex items-end gap-4">
+      <img
+        [src]="preview"
+        class="max-h-48 mx-auto rounded shadow"
+        alt="Image Preview"
+      />
+    </div>
+    <button class="rounded-md border p-1 mt-1 hover:shadow cursor-pointer bg-blue-200" (click)="clear()">Clear</button>
+    }
+  </div>
+</div>
