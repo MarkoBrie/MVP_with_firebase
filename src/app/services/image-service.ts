@@ -5,7 +5,7 @@ import {
   ref,
   uploadBytes,
 } from "@angular/fire/storage";
-//import { ImageCompressService } from "./image_compress.service";
+import { ImageCompressService } from "./image_compress";
 
 
 @Injectable({
@@ -13,7 +13,7 @@ import {
 })
 export class ImageService {
 
-  //imageCompress = inject(ImageCompressService);
+  imageCompress = inject(ImageCompressService);
   logStats = true;
 
 
@@ -28,18 +28,48 @@ export class ImageService {
    */
   private uploadFile(path: string, file: File, fileName:string, uploadEvent:any) {
     if (file) {
-      const storage = getStorage();
-      const dest = path + "/" + fileName;
-      const storageRef = ref(storage, dest);
-      uploadBytes(storageRef, file, {
-        cacheControl: "public, max-age=31536000, immutable",
-      }).then((value) => {
-        uploadEvent({
-          event: value,
-          path: dest,
+      this.compress(file, (name:string,compressed:File) => {
+        const storage = getStorage();
+        const dest = path + "/compressed/" + name;
+        const storageRef = ref(storage, dest);
+        uploadBytes(storageRef, compressed, {
+          cacheControl: "public, max-age=31536000, immutable",
+        }).then((value) => {
+          uploadEvent({
+            event: value,
+            path: dest,
+          });
         });
+      })
+      }
+  }
+
+  compress(file:File, callback:Function){
+        this.imageCompress
+      .compress(file, {
+        maxMP: 0.6, // ~2.5 megapixels
+        maxW: 1200,
+        maxH: 1200, // also cap long edges (optional)
+        quality: 0.8, // starting point
+        preferWebP: true, // will pick JPEG if smaller
+        flatten: true, // paint white behind transparent images
+        targetBytes: 120_000, // aim for ≤ ~342 KB (optional)
+        minQuality: 0.32, // don't go below this in the search
+      })
+      .then((result) => {
+        console.log("IN  ", (result.originalBytes / 1024).toFixed(1), "KB");
+        console.log(
+          "OUT ",
+          (result.finalBytes / 1024).toFixed(1),
+          "KB",
+          result.mime,
+          result.width,
+          "x",
+          result.height
+        );
+        const name = crypto.randomUUID() + ".webp";//can it not be a webp?
+        callback(name, result.file)
       });
-    }
   }
 
   /**
